@@ -4,15 +4,16 @@ import numpy as np
 
 #%%
 # hyper parameters pools
-dataset_name_list = ['2018-12-31_18'] #, '2019-01-31_18', '2019-02-28_18', '2019-03-31_18', '2019-04-30_18', '2019-05-31_18', '2019-06-30_18']
-embed_size_list = [1024]
+# dataset_name_list = ['2018-12-31_6', '2019-01-31_6', '2019-02-28_6', '2019-03-31_6', '2019-04-30_6', '2019-05-31_6', '2019-06-30_6']
+dataset_name_list = ['2018-12-31_18', '2019-01-31_18', '2019-02-28_18', '2019-03-31_18', '2019-04-30_18', '2019-05-31_18', '2019-06-30_18', '2018-12-31_6', '2019-01-31_6', '2019-02-28_6', '2019-03-31_6', '2019-04-30_6', '2019-05-31_6', '2019-06-30_6']
+embed_size_list = [1024] # [1024, 512, 256]
 n_layers_list = [1]
-batch_size_list = [20000] #[8192, 4096, 2048, 1024]
-epochs_list = [40, 50, 70, 100] #[1, 3, 5, 10, 15, 20, 30]
-learning_rate_list = [0.00001] # [0.0002, 0.0001, 0.00005, 0.00002, 0.00001]
-decay_list = [0] # [0.00002, 0.00005, 0.0001]
+batch_size_list = [5000] #[8192, 4096, 2048, 1024]
+epochs_list = [10]
+learning_rate_list = [0.00002]
+decay_list = [0] #, 0.0001]
 
-search_method = 'random'
+search_method = 'grid'
 n_trial = 1000 # number of trials for random search
 script = ''
 
@@ -56,7 +57,7 @@ print('Total time: {}h'.format(round(total_epochs*0.2/60, 2)))
 # print and save script
 # print(script)
 
-fp = open("run.bat", "w")
+fp = open("./run.bat", "w")
 fp.write(script)
 fp.close()
 # %%

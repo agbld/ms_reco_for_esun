@@ -43,6 +43,8 @@ try:
     parser.add_argument('--top_k', type=int, default=5)
     args = parser.parse_args()
 
+    en_train_log = True
+
     config = {'dataset_name': args.dataset_name, 
             'embed_size': args.embed_size, 
             'n_layers': args.n_layers, 
@@ -55,14 +57,15 @@ try:
             'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use cli')
 except:
+    en_train_log = False
     config = {'dataset_name': '2018-12-31_18', 
-            'embed_size': 1024, 
+            'embed_size': 2048, 
             'n_layers': 1, 
             'batch_size': 20000, 
             'decay': 0, #0.0001, 
-            'epochs': 5, 
+            'epochs': 15, #20, 
             'eval_epoch': -1, 
-            'learning_rate': 0.00002, 
+            'learning_rate': 0.00005, 
             'top_k': 5,
             'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use jupyter')
@@ -81,16 +84,18 @@ else:
 train_log.to_csv('./train_log.csv', index=False)
 
 #%%    
-train = get_esun_train_interactions(dataset_name=config['dataset_name'])
+train = get_esun_train_interactions(dataset_name=config['dataset_name'], overwrite=False, rating=True)
 train['userID'], cust_no_2_userID = to_consecutive_id(train['cust_no'])
 train['itemID'], wm_prod_code_2_itemID = to_consecutive_id(train['wm_prod_code'])
 train = train[['userID', 'itemID', 'rating', 'timestamp']]
 
 #%%
 # train, test = python_stratified_split(df, ratio=0.75)
+train, test = train[:int(len(train)*0.75)], train[int(len(train)*0.75):]
 
 #%%
 data = ImplicitCF(train=train, test=None)
+# data = ImplicitCF(train=train, test=test)
 
 #%%
 
@@ -141,9 +146,15 @@ config['result'] = 'success'
 config['end_time'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 #%%
-train_log = pd.read_csv('./train_log.csv')
-train_log.drop(train_log.tail(1).index,inplace=True)
-train_log = train_log.append(config, ignore_index=True)
-train_log.to_csv('./train_log.csv', index=False)
+# score, results_per_user = evaluation.results_mod()
+# log_name = 'LightGCN_{dataset_name}__{embed_size}__{n_layers}__{batch_size}__{decay}__{epochs}__{learning_rate}'.format(**config)
+# results_per_user.to_csv('../results_per_user/{}.csv'.format(log_name), index=False)
+
+#%%
+if en_train_log:
+    train_log = pd.read_csv('./train_log.csv')
+    train_log.drop(train_log.tail(1).index,inplace=True)
+    train_log = train_log.append(config, ignore_index=True)
+    train_log.to_csv('./train_log.csv', index=False)
 
 #%%

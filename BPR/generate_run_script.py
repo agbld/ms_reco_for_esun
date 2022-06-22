@@ -4,13 +4,14 @@ import numpy as np
 
 #%%
 # hyper parameters pools
-dataset_name_list = ['2018-12-31_18'] #, '2019-01-31_18', '2019-02-28_18', '2019-03-31_18', '2019-04-30_18', '2019-05-31_18', '2019-06-30_18']
+# dataset_name_list = ['2018-12-31_18', '2019-01-31_18', '2019-02-28_18', '2019-03-31_18', '2019-04-30_18', '2019-05-31_18', '2019-06-30_18']
+dataset_name_list = ['2018-12-31_6', '2019-01-31_6', '2019-02-28_6', '2019-03-31_6', '2019-04-30_6', '2019-05-31_6', '2019-06-30_6']
 num_factors_list = [400] #[100, 200, 400, 800]
-num_epochs_list = [200, 500, 1000]
-learning_rate_list = [0.02, 0.04, 0.08]
-lambda_reg_list = [0.0005, 0.0002, 0.0001]
+num_epochs_list = [1000] # [200, 500, 1000]
+learning_rate_list = [0.04] # [0.02, 0.04, 0.08]
+lambda_reg_list = [0.0005] #[0.0005, 0.0002, 0.0001]
 
-search_method = 'random'
+search_method = 'grid'
 n_trial = 1000 # number of trials for random search
 script = ''
 

@@ -39,11 +39,11 @@ try:
                 'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use cli')
 except:
-    config = {'dataset_name': '2018-12-31_6',
-                'num_factors': 200,
-                'num_epochs': 100,
-                'learning_rate': 0.01,
-                'lambda_reg': 0.001,
+    config = {'dataset_name': '2018-12-31_18',
+                'num_factors': 400,
+                'num_epochs': 1000,
+                'learning_rate': 0.04,
+                'lambda_reg': 0.0005,
                 'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use jupyter')
 
@@ -112,6 +112,11 @@ print('score: ', config['score'])
 
 config['result'] = 'success'
 config['end_time'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+#%%
+# score, results_per_user = evaluation.results_mod()
+# log_name = 'BPR__{dataset_name}__{num_factors}__{num_epochs}__{learning_rate}__{lambda_reg}__{create_time}'.format(**config)
+# results_per_user.to_csv('../results_per_user/{}.csv'.format(log_name), index=False)
 
 #%%
 train_log = pd.read_csv('./train_log.csv')

@@ -24,12 +24,15 @@ print("PyTorch version: {}".format(torch.__version__))
 print("Cornac version: {}".format(cornac.__version__))
 print('Torch CUDA available: {}'.format(torch.cuda.is_available()))
 
+# print time
+print('{}'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+
 #%%
 try:
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset_name', type=str)
     parser.add_argument('--latent_dim', type=int, default=16)
-    parser.add_argument('--encoder_dims', type=int, default=16)
+    parser.add_argument('--encoder_layers', type=int, default=16)
     parser.add_argument('--act_func', type=str, default='tanh')
     parser.add_argument('--likelihood', type=str, default='pois')
     parser.add_argument('--num_epochs', type=int, default=100)
@@ -40,7 +43,7 @@ try:
 
     config = {'dataset_name': args.dataset_name, 
               'latent_dim': args.latent_dim,
-              'encoder_dims': args.encoder_dims,
+              'encoder_layers': args.encoder_layers,
               'act_func': args.act_func,
               'likelihood': args.likelihood,
               'num_epochs': args.num_epochs,
@@ -50,19 +53,39 @@ try:
               'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use cli')
 except:
-    config = {'dataset_name': '2018-12-31_6',
-              'latent_dim': 128,
-              'encoder_dims': 128,
-              'act_func': 'tanh',
+    # config = {'dataset_name': '2018-12-31_18',
+    #           'latent_dim': 1024,
+    #           'encoder_layers': 3,
+    #           'act_func': 'sigmoid',
+    #           'likelihood': 'pois',
+    #           'num_epochs': 1,
+    #           'batch_size': 8000,
+    #           'learning_rate': 0.002,
+    #           'top_k': 5,
+    #           'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
+    config = {'dataset_name': '2018-12-31_18',
+              'latent_dim': 1024,
+              'encoder_layers': 0,
+              'act_func': 'sigmoid',
               'likelihood': 'pois',
-              'num_epochs': 10,
-              'batch_size': 1024,
-              'learning_rate': 0.01,
+              'num_epochs': 5,
+              'batch_size': 4000,
+              'learning_rate': 0.002,
               'top_k': 5,
               'create_time': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
     print('use jupyter')
 
 print(config)
+
+config['result'] = 'failed'
+config['score'] = 0
+
+if os.path.exists('./train_log.csv'):
+    train_log = pd.read_csv('./train_log.csv')
+    train_log = train_log.append(config, ignore_index=True)
+else:
+    train_log = pd.DataFrame([config])
+train_log.to_csv('./train_log.csv', index=False)
 
 # Select MovieLens data size: 100k, 1m, 10m, or 20m
 # MOVIELENS_DATA_SIZE = '100k'
@@ -72,7 +95,7 @@ TOP_K = config['top_k']
 
 # Model parameters
 LATENT_DIM = config['latent_dim']
-ENCODER_DIMS =  [config['encoder_dims']]
+ENCODER_LAYERS =  config['encoder_layers']
 ACT_FUNC = config['act_func']
 LIKELIHOOD = config['likelihood']
 NUM_EPOCHS = config['num_epochs']
@@ -101,9 +124,17 @@ print('Number of users: {}'.format(train_set.num_users))
 print('Number of items: {}'.format(train_set.num_items))
 
 #%%
+if train_set.num_users < train_set.num_items:
+    first_layer_dim = train_set.num_users
+else:
+    first_layer_dim = train_set.num_items
+encoder_structure = []
+for i in range(ENCODER_LAYERS):
+    dim = (first_layer_dim - LATENT_DIM) / (ENCODER_LAYERS + 1) * (ENCODER_LAYERS - i) + LATENT_DIM
+    encoder_structure.append(int(dim))
 bivae = cornac.models.BiVAECF(
     k=LATENT_DIM,
-    encoder_structure=ENCODER_DIMS,
+    encoder_structure=encoder_structure,
     act_fn=ACT_FUNC,
     likelihood=LIKELIHOOD,
     n_epochs=NUM_EPOCHS,
@@ -139,12 +170,20 @@ evaluation = Evaluation('', '../esun/dataset/{}/interaction_eval.csv'.format(con
 config['score'] = evaluation.results()
 print('score: ', config['score'])
 
+config['result'] = 'success'
 config['end_time'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 #%%
-if os.path.exists('./train_log.csv'):
-    train_log = pd.read_csv('./train_log.csv')
-    train_log = train_log.append(config, ignore_index=True)
-else:
-    train_log = pd.DataFrame([config])
+# score, results_per_user = evaluation.results_mod()
+# log_name = 'BiVAE__{dataset_name}__{latent_dim}__{encoder_dims}__{act_func}__{likelihood}__{num_epochs}__{batch_size}__{learning_rate}__{top_k}__{create_time}'.format(**config)
+# results_per_user.to_csv('../results_per_user/{}.csv'.format(log_name), index=False)
+
+#%%
+train_log = pd.read_csv('./train_log.csv')
+train_log.drop(train_log.tail(1).index,inplace=True)
+train_log = train_log.append(config, ignore_index=True)
 train_log.to_csv('./train_log.csv', index=False)
+
+#%%
+# print time
+print('{}'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
